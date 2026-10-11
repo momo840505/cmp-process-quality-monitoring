@@ -1,0 +1,3 @@
+# Install in your existing .venv. Keep your original requirements.txt unchanged.
+streamlit>=1.35,<2
+plotly>=5.20,<7

@@ -1,0 +1,49 @@
+# Python local environment and caches
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+.coverage
+htmlcov/
+
+# Local settings and secrets
+.env
+.env.*
+!.env.example
+.streamlit/secrets.toml
+*.pem
+*.key
+
+# Source dataset and locally generated research results
+# Keep THIRD-PARTY raw files and the model outputs out of public Git.
+data/
+outputs/
+PHM-Data-Challenge/
+
+# Binary artifacts / checkpoints (curated screenshots can go in docs/figures/)
+*.joblib
+*.pkl
+*.pickle
+*.sqlite
+*.sqlite3
+*.db
+*.nc
+*.h5
+*.hdf5
+*.parquet
+
+# Downloaded archives at project root
+/*.zip
+/*.7z
+/*.rar
+
+# IDE / OS clutter
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+Desktop.ini
