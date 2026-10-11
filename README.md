@@ -63,6 +63,44 @@ Codes 1–3 與 Codes 4–6 的 MAE 分別較中位數基準下降約 **24.7%** 
 
 模擬 MAE 下降約 **74.6%**，同時需要 **116 次設定值調整**。這不是 PHM 或 Micron 實際的良率、MRR 或製程改善成效。
 
+
+## 專案圖表精選
+
+下面是已完成分析的**實際圖表**，數值來自先前固定的研究結果；不代表正式晶圓廠的製程監控或良率改善。完整統計限制請參閱各段說明。
+
+| SPC：探索性管制圖 | FDC：待查訊號候選 |
+|---|---|
+| ![Codes 4–6 的示範 I Chart，並非正式製程界限](docs/figures/spc_codes_4_6.png) | ![依匿名代碼分組的感測異常候選](docs/figures/fdc_candidates.png) |
+
+| VM：內部 Test | R2R：獨立模擬 |
+|---|---|
+| ![Codes 4–6 的內部 Test 預測](docs/figures/vm_codes_4_6.png) | ![人工模擬固定設定與 EWMA 回授比較](docs/figures/r2r_comparison.png) |
+
+## 線上展示與本機完整分析
+
+本儲存庫保留兩種展示入口：
+
+- **`streamlit_app.py`（可公開部署）**：使用經核對的彙總指標、自製分析圖片，以及 120 輪**純人工模擬**的輕量資料；沒有公開 PHM 原始感測 CSV、逐片特徵、逐片品質標籤、模型檔或私密設定。SPC／FDC／VM 為成果展示，不能在網上重新執行完整資料分析。
+- **`dashboard.py`（本機詳細版）**：使用本機生成的 `outputs/`，提供更多逐片回查資訊；因公開 repo 排除了 `outputs/`，**直接把它指定為 Cloud 入口會找不到檔案**。
+
+公開展示版和本機詳細版採用**同一份已核對的彙總結果**，但功能深度不同。公開版不是線上製程控制，也不會上傳／計算真實晶圓資料。
+
+### 部署 Streamlit Community Cloud
+
+1. 將 `streamlit_app.py`、`public_data/`、`docs/figures/`、更新的 `requirements.txt` 推送到此 GitHub Repository 的 `main` 分支。
+2. 到 [Streamlit Community Cloud](https://share.streamlit.io/)，使用 GitHub 帳號登入，選擇 **Create app**。
+3. Repository 選 `momo840505/cmp-process-quality-monitoring`，Branch 選 `main`，**Main file path 選 `streamlit_app.py`**，再按 Deploy。
+4. 待網站成功啟動，將真正產生的 `*.streamlit.app` 網址補在此 README。**目前不預先宣稱已部署完成或編造網址。**
+
+本機預先驗證公開版：
+
+```powershell
+.\.venv\Scripts\python.exe -m unittest discover -s tests -p "test_public_deployment.py" -v
+.\.venv\Scripts\python.exe -m streamlit run .\streamlit_app.py
+```
+
+詳細注意事項：[公開部署指南](docs/cloud_deployment_guide.md)。
+
 ## 技術與專案架構
 
 - **資料處理：** Python、pandas、NumPy；原始檔案盤點、去重與資料品質稽核。
@@ -77,10 +115,12 @@ CMP-Process-QE/
 ├── .gitignore
 ├── requirements.txt
 ├── requirements_dashboard.txt
-├── dashboard.py
+├── dashboard.py             # 本機詳細分析版
+├── streamlit_app.py          # GitHub 可部署的公開彙總展示版
+├── public_data/              # 可發布的彙總指標 + 獨立模擬
 ├── src/                      # 01～08B 分析、模型、模擬與驗證程式
 ├── tests/                    # 單元測試及資料驗收
-├── docs/                     # 各階段的中文說明及公開指引
+├── docs/                     # 學習筆記、部署指引與精選結果圖片
 └── outputs/                  # 本機執行結果，不提交 Git
     ├── audit/
     ├── processed/
@@ -100,10 +140,9 @@ cd "$HOME\Desktop\CMP-Process-QE"
 python -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -r .\requirements.txt
 .\.venv\Scripts\python.exe -m pip install -r .\requirements_dashboard.txt
-.\.venv\Scripts\python.exe -m pip install "matplotlib>=3.8,<4" "scikit-learn>=1.4,<2"
 ```
 
-> `requirements.txt` 與 `requirements_dashboard.txt` 是本專案現有依賴檔。Matplotlib 和 scikit-learn 在此列為額外安裝項目；目前尚未提供完全鎖版的環境檔，因此不同套件版本可能產生細微差異。
+> 已更新 `requirements.txt`，納入資料分析、機器學習及 Streamlit/Plotly 依賴。原本的 `requirements_dashboard.txt` 仍可作為單獨安裝展示介面的補充清單。套件使用版本範圍，未提供完全鎖版檔，因此不同版本仍可能有細微差異。
 
 ### 2. 取得資料
 

@@ -24,7 +24,7 @@ try:
 except (FileNotFoundError, ValueError, KeyError, OSError) as exc:
     st.error('找不到完整分析結果，或輸出檔案無法通過一致性檢查。請勿使用錯誤資料繪圖。')
     st.code(str(exc))
-    st.info('請確認 Step 04A、04B、05C、05E、06D、07A、07C 已完成。詳細所需檔案見 README_STEP08A.md。')
+    st.info('請確認 Step 04A、04B、05C、05E、06D、07A、07C 已完成。請參照 README.md 的重建流程。')
     st.stop()
 
 p_spc, p_fdc, p_vm, p_r2r, p_scope = st.tabs(['01｜SPC 統計監控', '02｜FDC 與人工回查', '03｜虛擬量測 VM', '04｜R2R 模擬', '資料來源與限制'])
@@ -61,7 +61,8 @@ with p_fdc:
     a.metric('感測偏差候選晶圓',len(d.fdc_cases))
     b.metric('觸發的感測項目',len(d.fdc_signals))
     c.metric('候選 MRR 超出描述性區間',int(d.fdc_cases.outside_reference_MRR_q05_q95_descriptive.fillna(False).astype(bool).sum()))
-    bar = px.bar(d.fdc_summary,x='MACHINE_DATA',y=['later_any_family','later_two_or_more_families'],barmode='group',labels={'MACHINE_DATA':'MACHINE_DATA 匿名代碼','value':'晶圓－代碼筆數','variable':'判別'},title='Training 後段的感測數值偏離數量')
+    bar = px.bar(d.fdc_summary,x='MACHINE_DATA',y=['later_any_family','later_two_or_more_families'],barmode='group',labels={'MACHINE_DATA':'匿名代碼','value':'晶圓－代碼筆數','variable':'篩選規則'},title='Training 後段的感測數值偏離數量')
+    bar.for_each_trace(lambda trace: trace.update(name={'later_any_family':'至少一類數值偏差','later_two_or_more_families':'至少兩類同時偏差'}.get(trace.name, trace.name)))
     st.plotly_chart(bar,use_container_width=True)
     st.caption('以下保留個案原始識別碼，僅供公開資料的分析追溯；不涉及真實人員資訊。')
     ids=d.fdc_cases.WAFER_ID.astype(str).tolist()
@@ -72,7 +73,7 @@ with p_fdc:
     view=sig[['signal','family','direction','observed_median_nonzero','reference_q01','reference_q99']].rename(columns={'signal':'訊號','family':'類別','direction':'偏離方向','observed_median_nonzero':'非零值中位數','reference_q01':'參考 Q01','reference_q99':'參考 Q99'})
     st.dataframe(view,use_container_width=True,hide_index=True)
     with st.expander('查看 11 片完整候選名單'):
-        st.dataframe(d.fdc_cases,use_container_width=True,hide_index=True)
+        st.dataframe(d.fdc_cases[['WAFER_ID','MACHINE_DATA','measured_MRR','frozen_signal_family_count']].rename(columns={'WAFER_ID':'晶圓識別碼','MACHINE_DATA':'匿名代碼','measured_MRR':'量測 MRR','frozen_signal_family_count':'觸發訊號類別數'}),use_container_width=True,hide_index=True)
     st.info('建議回查：先核對感測記錄與量測時點，再比對設備設定、耗材及保養歷史，交由製程／設備工程師確認。沒有實際執行停機或製程調整。')
 
 with p_vm:
@@ -91,7 +92,7 @@ with p_vm:
     fig.add_trace(go.Scatter(x=[limlo,limhi],y=[limlo,limhi],mode='lines',line=dict(color='gray',dash='dash'),name='理想預測'))
     fig.update_layout(height=470)
     st.plotly_chart(fig,use_container_width=True)
-    st.dataframe(m[['model','test_rows','all_mae','all_rmse','all_r2']],hide_index=True,use_container_width=True)
+    st.dataframe(m[['model','test_rows','all_mae','all_rmse','all_r2']].rename(columns={'model':'預測方法','test_rows':'測試晶圓數','all_mae':'平均絕對誤差 MAE','all_rmse':'均方根誤差 RMSE','all_r2':'決定係數 R²'}),hide_index=True,use_container_width=True)
     st.warning('這是從 PHM 原始 Training 內部切出的 Test，不是官方競賽外部 Test；曾出現的極端 MRR 在這次 Test 未重現，不能聲稱模型能處理該情況。')
 
 with p_r2r:
@@ -117,7 +118,7 @@ with p_r2r:
     for bound in [42,58]:fig2.add_hline(y=bound,line_color='gray',line_dash='dot')
     fig2.update_layout(title='設定值調整（假設範圍 42～58）',xaxis_title='模擬輪次',yaxis_title='假設設定值',height=360)
     st.plotly_chart(fig2,use_container_width=True)
-    st.dataframe(d.r2r_comparison,hide_index=True,use_container_width=True)
+    st.dataframe(d.r2r_comparison.rename(columns={'metric':'評估指標','open_loop':'固定設定','closed_loop':'EWMA 回授','closed_minus_open':'差異（回授－固定）','relative_reduction_pct':'相對降低 (%)'}),hide_index=True,use_container_width=True)
     st.caption('控制器只使用上一輪已完成的量測；沒有取得模擬器隱藏的漂移、真實增益與雜訊。回授能降低偏差，但增加 116 次設定值變動。')
 
 with p_scope:
