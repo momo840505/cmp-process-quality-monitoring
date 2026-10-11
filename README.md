@@ -4,6 +4,14 @@
 
 這是一個研究與學習作品，**不是** Micron 或任何晶圓廠已部署的製程控制系統。
 
+## 線上展示（Streamlit Cloud）
+
+**[▶ 開啟 CMP 製程品質分析 Dashboard](https://cmp-process-quality-monitoring.streamlit.app/)**
+
+公開版提供 SPC、FDC、虛擬量測（VM）、R2R 模擬及「資料來源與限制」五個頁籤，可切換匿名代碼組、查看已固定的研究成果，以及調整 R2R 人工模擬的顯示輪數。
+
+線上網站僅展示經核對的彙總指標、分析圖表與**獨立人工模擬**。不提供 PHM 原始感測資料、逐片晶圓量測、模型推論服務或真實設備控制；若要深入逐片檢查，請依下方說明在本機使用 `dashboard.py`。
+
 ## 專案想解決的問題
 
 - 同樣標記為 Stage A 的晶圓，為什麼 MRR 明顯分成不同群體？
@@ -90,7 +98,7 @@ Codes 1–3 與 Codes 4–6 的 MAE 分別較中位數基準下降約 **24.7%** 
 1. 將 `streamlit_app.py`、`public_data/`、`docs/figures/`、更新的 `requirements.txt` 推送到此 GitHub Repository 的 `main` 分支。
 2. 到 [Streamlit Community Cloud](https://share.streamlit.io/)，使用 GitHub 帳號登入，選擇 **Create app**。
 3. Repository 選 `momo840505/cmp-process-quality-monitoring`，Branch 選 `main`，**Main file path 選 `streamlit_app.py`**，再按 Deploy。
-4. 待網站成功啟動，將真正產生的 `*.streamlit.app` 網址補在此 README。**目前不預先宣稱已部署完成或編造網址。**
+4. 部署後請實際檢查五個頁籤、匿名代碼切換與 R2R 滑桿；目前公開展示網址已列於 README 上方「線上展示」。
 
 本機預先驗證公開版：
 
